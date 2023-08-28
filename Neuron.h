@@ -145,19 +145,6 @@ public:
 	bool step(double dt = 0.025, double I_app = 0, double SNr = 0);
 
 	/**
-	 * @brief Run a simulation.
-	 * @param dt Time step size in ms.
-	 * @param N Number of steps.
-	 * @param n Number of output variables.
-	 * @param var An n-dimensional array of pointers pointing to the member variables of neuron for ouput.
-	 * @param[out] val An n-by-N-dimensional array of output values.
-	 * @param[out] spk An k-dimensional array of spike timestamps.
-	 * @param[out] isi An k-dimensional array of inter-spike intervals.
-	 * @return Number of spikes k.
-	 */
-	int run(double dt, int N, int n, const double** var, double**& val, double*& spk, double*& isi);
-
-	/**
      * @brief Save the neuron state into a binary file. 
 	 * This method is sensitive to any modification to the member variables of this class.
 	 * The stimulation infomation cannot be saved or loaded.
@@ -172,7 +159,7 @@ public:
 	int load(const char* filename = neuron_file);
 
 	/**
-     * @brief Stream the values of selected state variables.
+     * @brief Stream the values of selected state variables. Intended for debugging purposes.
      */
 	friend std::ostream& operator<<(std::ostream& os, const Neuron& obj);
 

@@ -140,7 +140,7 @@ void voltage_clamp(Neuron& neuron, double V0) {
 
 	Plot gp0;
 	gp0.plot(val[0], V0, "V_s").plot(val[0], val[2], "V_d").
-		plot(val[0], val[3], "E_GABA_som").plot(val[0], val[4], "E_GABA_den");
+		plot(val[0], val[3], "E_{GABA}_{som}").plot(val[0], val[4], "E_{GABA}_{den}");
 	gp0.xlabel("t (ms)").ylabel("V (mV)").xrange(0, 5e3);
 	gp0.flush();
 
@@ -192,7 +192,7 @@ void current_clamp(Neuron& neuron) {
 
 	Plot gp0;
 	gp0.plot(val[0], val[1], "V_s").plot(val[0], val[2], "V_d").
-		plot(val[0], val[3], "E_GABA_som").plot(val[0], val[4], "E_GABA_den");
+		plot(val[0], val[3], "E_{GABA}_{som}").plot(val[0], val[4], "E_{GABA}_{den}");
 	gp0.xlabel("t (ms)").ylabel("V (mV)").xrange(0, 5e3);
 	gp0.flush();
 
@@ -208,4 +208,54 @@ void current_clamp(Neuron& neuron) {
 	gp3.flush(); //.save("I_DS.png"); // display and save
 
 
+}
+
+void test_inhibition(Neuron& neuron, const char* target) {
+
+	reset();
+	neuron.g_KCC2 = 0.;
+	neuron.g_tonic = 0.0;
+	neuron.Cl_som = 6;
+
+	double a = 0;
+	while (abs(a - neuron.Cl_som) > 1e-5) {
+		a = neuron.Cl_som;
+		neuron.step();
+	}
+	neuron.time = 0;
+
+	Stim stim = { 1e3, 2e3, 20, 0.025 };
+	if (~strcmp(target, "GPe"))
+		neuron.GPe = &stim;
+	if (~strcmp(target, "Str"))
+		neuron.Str = &stim;
+
+	const double* var[] = { &neuron.time, &neuron.V_s, &neuron.E_GABA_som, &neuron.E_GABA_den, &neuron.g_GABA_som, &neuron.Cl_som, &neuron.Cl_den, nullptr };
+	int n = 0; if (var) while (var[n]) n++;
+	std::vector<double>* val = new std::vector<double>[n];
+	while (neuron.time < 3e3) {
+		neuron.step();
+		for (int j = 0; j < n; j++)
+			val[j].push_back(*var[j]);
+	}
+
+	Plot gp1;
+	gp1.plot(val[0], val[1], "V_s").plot(val[0], val[2], "E_{GABA}_{som}");
+	gp1.xlabel("time (ms)").ylabel("V_s (mV)");
+	gp1.flush();
+
+	Plot gp2;
+	gp2.plot(val[0], val[5], "Cl_{som}").plot(val[0], val[6], "Cl_{den}");
+	gp2.xlabel("time (ms)").ylabel("Cl (mM)");
+	gp2.flush();
+
+	Plot gp3;
+	gp3.plot(val[0], val[4], "g_{GABA}");
+	gp3.xlabel("time (ms)").ylabel("g_{GABA}");
+	gp3.flush();
+
+	Plot gp4;
+	gp4.plot(val[0], val[2], "E_{GABA}_{som}").plot(val[0], val[3], "E_{GABA}_{den}");
+	gp4.xlabel("time (ms)").ylabel("E_{GABA}_{som} (mV)");
+	gp4.flush();
 }

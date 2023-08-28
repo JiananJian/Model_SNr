@@ -15,7 +15,7 @@ link_directories("C:/Boost/lib")
 
 # Add source to this project's executable.
 add_executable (CMakeProject1 
-  "CMakeProject1.cpp" 
+  "main.cpp" 
   "Neuron.cpp" 
   "Gate.cpp" 
   "Stim.cpp" 

@@ -49,7 +49,7 @@ cmake_ninja_workdir = C$:\Users\leojn\source\repos\CMakeProject1\out\build\x64-d
 
 build cmake_object_order_depends_target_CMakeProject1: phony || CMakeFiles\CMakeProject1.dir
 
-build CMakeFiles\CMakeProject1.dir\CMakeProject1.cpp.obj: CXX_COMPILER__CMakeProject1_unscanned_Debug C$:\Users\leojn\source\repos\CMakeProject1\CMakeProject1.cpp || cmake_object_order_depends_target_CMakeProject1
+build CMakeFiles\CMakeProject1.dir\main.cpp.obj: CXX_COMPILER__CMakeProject1_unscanned_Debug C$:\Users\leojn\source\repos\CMakeProject1\main.cpp || cmake_object_order_depends_target_CMakeProject1
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Ob0 /Od /RTC1 -std:c++20 -ZI
   INCLUDES = -IC:\Boost\include\boost-1_81
   OBJECT_DIR = CMakeFiles\CMakeProject1.dir
@@ -129,7 +129,7 @@ build CMakeFiles\CMakeProject1.dir\utilities.cpp.obj: CXX_COMPILER__CMakeProject
 #############################################
 # Link the executable CMakeProject1.exe
 
-build CMakeProject1.exe: CXX_EXECUTABLE_LINKER__CMakeProject1_Debug CMakeFiles\CMakeProject1.dir\CMakeProject1.cpp.obj CMakeFiles\CMakeProject1.dir\Neuron.cpp.obj CMakeFiles\CMakeProject1.dir\Gate.cpp.obj CMakeFiles\CMakeProject1.dir\Stim.cpp.obj CMakeFiles\CMakeProject1.dir\Simulation.cpp.obj CMakeFiles\CMakeProject1.dir\Population.cpp.obj CMakeFiles\CMakeProject1.dir\io_data.cpp.obj CMakeFiles\CMakeProject1.dir\Plot.cpp.obj CMakeFiles\CMakeProject1.dir\utilities.cpp.obj
+build CMakeProject1.exe: CXX_EXECUTABLE_LINKER__CMakeProject1_Debug CMakeFiles\CMakeProject1.dir\main.cpp.obj CMakeFiles\CMakeProject1.dir\Neuron.cpp.obj CMakeFiles\CMakeProject1.dir\Gate.cpp.obj CMakeFiles\CMakeProject1.dir\Stim.cpp.obj CMakeFiles\CMakeProject1.dir\Simulation.cpp.obj CMakeFiles\CMakeProject1.dir\Population.cpp.obj CMakeFiles\CMakeProject1.dir\io_data.cpp.obj CMakeFiles\CMakeProject1.dir\Plot.cpp.obj CMakeFiles\CMakeProject1.dir\utilities.cpp.obj
   FLAGS = /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd /Ob0 /Od /RTC1 -ZI
   LINK_FLAGS = /machine:x64 /debug /INCREMENTAL /subsystem:console
   LINK_LIBRARIES = kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib

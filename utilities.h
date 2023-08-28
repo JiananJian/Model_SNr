@@ -10,3 +10,5 @@ void g_SK_vs_rate(Neuron& neuron);
 void voltage_clamp(Neuron& neuron, double V0);
 
 void current_clamp(Neuron& neuron);
+
+void test_inhibition(Neuron& neuron, const char* target);

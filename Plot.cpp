@@ -92,3 +92,13 @@ Plot& Plot::clear() {
 //	gp << manipulator;
 //	return *this;
 //}
+
+// Example : how to use gnuplot 
+//void f() {
+//	double x[5] = { 1.0, 2.0, 3.0, 4.0, 5.0 };
+//	double y[5] = { 1.0, 4.0, 9.0, 16.0, 25.0 };
+//
+//	Gnuplot gp;
+//	gp << "plot '-' with lines title 'x vs y'\n";
+//	gp.send1d(boost::make_tuple(x, y));
+//}
