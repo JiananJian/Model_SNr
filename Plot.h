@@ -3,6 +3,9 @@
 #include "gnuplot-iostream.h"
 #include "io_data.h"
 
+/**
+ * @brief 
+ */
 class Plot : public Gnuplot {
 public:
 	//Gnuplot gp;

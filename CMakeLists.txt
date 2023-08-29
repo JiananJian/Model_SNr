@@ -19,7 +19,7 @@ add_executable (CMakeProject1
   "Neuron.cpp" 
   "Gate.cpp" 
   "Stim.cpp" 
-  "Simulation.cpp"
+  
   "Population.cpp" 
   "io_data.cpp" "Plot.cpp" "utilities.cpp") 
 
