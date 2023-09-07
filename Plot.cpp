@@ -1,4 +1,5 @@
 #include "Plot.h"
+#include "arithmetic.h"
 
 Plot& Plot::xlabel(const char* label) {
 	*this << "set xlabel '" << label << "'\n";
@@ -48,17 +49,21 @@ Plot& Plot::save(const char* file) {
 Plot& Plot::plot(std::vector<double> x0, std::vector<double> y0, const char* title, const char* style) {
 	x.push_back(x0);
 	y.push_back(y0);
-	titles.push_back(title);
-	styles.push_back(style);
+	std::string _title = title;
+	std::string _style = style;
+	titles.push_back(_title);
+	styles.push_back(_style);
 	return *this;
 }
 
-Plot& Plot::plot(std::vector<double> x0, double y0, const char* title, const char* style) {
-	x.push_back(x0);
-	y.push_back(0.0 * x0 + y0);
-	titles.push_back(title);
-	styles.push_back(style);
-	return *this;
+Plot& Plot::plot(std::vector<double> x, double* y, const char* legend, const char* style) {
+	int n = x.size();
+	std::vector<double> z(y, y + n);
+	return plot(x, z, legend, style);
+}
+
+Plot& Plot::plot(std::vector<double> x, double y, const char* legend, const char* style) {
+	return plot(x, 0.0 * x + y, legend, style);
 }
 
 Plot& Plot::flush() {
@@ -68,7 +73,20 @@ Plot& Plot::flush() {
 	}
 	*this << "\n";
 	for (int i = 0; i < x.size(); i++) {
-		send1d(boost::make_tuple(x[i], y[i]));
+		//int j = 1;
+		//while (j + 1000 < x.size()) {
+		//	std::vector<double> x0(x[i].begin() + j - 1, x[i].begin() + j + 1000+1);
+		//	std::vector<double> y0(y[i].begin() + j - 1, y[i].begin() + j + 1000+1);
+		//	send1d(boost::make_tuple(x0, y0));
+		//	j += 1000;
+		//	Gnuplot::flush();
+		//}
+		//std::vector<double> x0(x[i].begin() + j - 1, x[i].end());
+		//std::vector<double> y0(y[i].begin() + j - 1, y[i].end());
+		//send1d(boost::make_tuple(x0, y0));
+		//Gnuplot::flush();
+
+		send1d(boost::make_tuple(sampling(x[i]), sampling(y[i]))); // limit resolution to accelerate the graphics, but spike peak amplitude may be irregularly reduced
 	}
 	Gnuplot::flush();
 	return *this;
@@ -78,6 +96,7 @@ Plot& Plot::clear() {
 	x.clear();
 	y.clear();
 	titles.clear();
+	styles.clear();
 	*this << "clear\n";
 	*this << "reset\n";
 	return *this;

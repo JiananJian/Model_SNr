@@ -2,7 +2,6 @@
 
 #include "Stim.h"
 #include "Gate.h"
-#include "io_data.h"
 
 // Thermal voltage at 308K in mV
 #define V_T 26.54 
@@ -24,10 +23,6 @@
 #define g_Ca .7 // Ca++ channel 
 #define g_leak .04  // leak channel
 #define g_TRPC3 .1 // TRPC3 channel 
-#define g_HCN 0.0
-#define W_Str .4  
-#define W_GPe .2
-#define W_SNr .1  
 
 // Capacitance in pF
 #define C_som 100.
@@ -38,7 +33,7 @@
 #define E_K -90. 
 #define E_leak -60. 
 #define E_TRPC3 -37. 
-#define E_HCN -30. 
+#define E_HCN -45. // or -30 maybe?
 
 // Ion concentrations in mM
 #define Cl_out 120. 
@@ -46,13 +41,7 @@
 #define HCO3_out 25. 
 #define Ca_out 4. 
 
-// Charge to concentration conversion factors in mM/fC
-#define alpha_Ca 0.925e-7 // 1e-8 in Phillips2020
-#define alpha_Cl_som 1.85e-7 // 1.77e-7 in Phillips2020
-#define alpha_Cl_den 2.3e-6 // 2.2125e-7 in Phillips2020 
-
 // Other constants
-#define V_th -35. // spike threshold in mV
 #define k_SK .4e-3 // m_SK half-maximal activation in mM
 #define n_SK 4. // m_SK Hill coefficient, dimensionless
 #define Ca_min 5e-8 // in mM
@@ -72,6 +61,8 @@
 
 class Neuron {
 public:
+	/* ******** state variables ******** */
+
 	// simulation time in ms
 	double time = 0;
 
@@ -79,7 +70,7 @@ public:
 	double V_s = E_leak;
 	double V_d = E_leak;
 
-	// Gate activation levels
+	// Gate activation levels, dimensionless
 	double m_Na_f = 0.1;
 	double h_Na_f = 0.9;
 	double s_Na_f = 0.9;
@@ -89,38 +80,56 @@ public:
 	double h_K = 0.9;
 	double m_Ca = 0.001;
 	double h_Ca = 0.001;
-	double m_HCN = 0.01;
+	double m_HCN_som = 0.01;
+	double m_HCN_den = 0.01;
+
+	// Synapse plasticity, dimensionless
+	double D = D_0;
+	double F = F_0;
 
 	// Ion concentrations in mM
 	double Ca_in = 2.5e-4;
 	double Cl_som = 6;
 	double Cl_den = 6;
 
+	// Ion channel channel delay constants in nS/pF = 1/ms
+	double g_GABA_som = 0;
+	double g_GABA_den = 0;
+
+	/* ******** output variables ******** */
+	double dVs_dt = 0; // in mV/ms
+	double dVd_dt = 0; // in mV/ms
+	double I_GABA_som = 0; // in mV/ms = pA/pF
+	double I_GABA_den = 0; // in mV/ms = pA/pF
+	double E_GABA_som = 0; // in mV
+	double E_GABA_den = 0; // in mV
+
+	/* ******** parameters ******** */
+
+	// Stimulation parameters
+	Stim* GPe = nullptr;
+	Stim* Str = nullptr;
+
 	// Ion channel channel delay constants in nS/pF = 1/(ms)
 	double g_SK = 0.009; // Calcium-activated K+ channel, reduces the firing rate
 	double g_KCC2 = 0; // between 0.0 to 0.4 nS/pF
 	double g_tonic = 0; // between 0.0 to 1.0 nS/pF
-	double g_GABA_som = 0;
-	double g_GABA_den = 0;
+	double g_HCN_som = 0;
+	double g_HCN_den = 0;
+	double W_Str = .4;
+	double W_GPe = .2;
+	double W_SNr = .1;
+
+	// parameters
+	double V_th = -35; // spike threshold in mV
+
+	// Charge to concentration conversion factors in mM/fC
+	double alpha_Ca = 0.925e-7; // 1e-8 in Phillips2020
+	double alpha_Cl_som = 1.85e-7; // 1.77e-7 in Phillips2020
+	double alpha_Cl_den = 2.3e-6; // 2.2125e-7 in Phillips2020 
 
 	// Conductance in nS
 	double g_C = 26.5; // dendrite-soma coupling
-
-	// Synapse plasticity
-	double D = D_0;
-	double F = F_0;
-
-	// Output variables (not state variables)
-	double dVs_dt = 0; // in mV/ms
-	double dVd_dt = 0; // in mV/ms
-	double E_GABA_som = 0; // in mV
-	double E_GABA_den = 0; // in mV
-	double I_GABA_som = 0; // mV/ms
-	double I_GABA_den = 0; // mV/ms
-	
-	// Stimulation parameters
-	Stim* GPe = nullptr;
-	Stim* Str = nullptr;
 
 	// Methods    
 	/**
@@ -136,32 +145,13 @@ public:
 
 	/**
      * @brief Neuron dynamics in a time step.
-	 * The GPe and Str inputs are specified by the member objects this.GPe and this.Str
+	 * The GPe and Str inputs are specified by the member objects this->GPe and this->Str
      * @param dt Time step size in ms.
 	 * @param I_app Applied current in pA.
 	 * @param SNr Inputs in nS/pF received from other SNr within this time step.
      * @return Whether an AP generates.
      */
 	bool step(double dt = 0.025, double I_app = 0, double SNr = 0);
-
-	/**
-     * @brief Save the neuron state into a binary file. 
-	 * This method is sensitive to any modification to the member variables of this class.
-	 * The stimulation infomation cannot be saved or loaded.
-     */
-	int save(const char* filename = neuron_file) const;
-
-	/**
-     * @brief Load the neuron state from a binary file.
-	 * This method is sensitive to any modification to the member variables of this class.
-	 * The stimulation infomation cannot be saved or loaded.
-     */
-	int load(const char* filename = neuron_file);
-
-	/**
-     * @brief Stream the values of selected state variables. Intended for debugging purposes.
-     */
-	friend std::ostream& operator<<(std::ostream& os, const Neuron& obj);
 
 private:
 	// Ion gate parameters

@@ -16,5 +16,5 @@ public:
 	const double sig_0; // in mV
 	const double sig_1; // in mV
 
-	double dzdt(double z, double V) const;
+	double dz(double z, double V, double dt) const; // dimensionless
 };
